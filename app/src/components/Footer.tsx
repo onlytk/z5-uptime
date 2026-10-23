@@ -12,8 +12,8 @@ export default function Footer() {
             <Logo />
           </a>
           <p className="mt-4 text-[13px] leading-relaxed text-dim">
-            This page is hosted on GitHub, separate from our servers, so it keeps working when z5.gg doesn&apos;t. z5.gg is checked from outside about every 5 minutes, when
-            GitHub runs the schedule; each part&apos;s state comes from the platform&apos;s own checks, which run every minute.
+            This status page is hosted independently of our core infrastructure to remain available during service disruptions. Availability is verified externally at
+            regular intervals, and component status is reported by our internal monitoring every minute.
           </p>
         </div>
         <div className="flex gap-10 text-[13px]">

@@ -53,7 +53,7 @@ function intro(history: History | null, failed: boolean, now: number) {
   if (history.last.site !== "up")
     return `Three checks from outside in a row got no good answer${history.last.code ? ` (HTTP ${history.last.code})` : ""}. We're on it, and this page keeps updating.`;
   if (history.last.partsKnown === false) return "z5.gg answers from outside, but the state of its parts couldn't be read on the last check.";
-  return "Checkout, the API, every network we watch and the money that moves through them. Checked from outside our servers, on a page that stays up when we don't.";
+  return "Real-time status for checkout, the API, and every supported network and payment flow. Monitored independently from outside our infrastructure.";
 }
 
 function stats(history: History | null, now: number): StatProps[] {
@@ -65,6 +65,6 @@ function stats(history: History | null, now: number): StatProps[] {
     { label: "z5.gg uptime", value: site.total ? percent(site.ok, site.total) : "—", hint: span },
     { label: "Incidents", value: String(recentIncidents(history, now).length), hint: span },
     { label: "Networks", value: networks.value, hint: networks.hint, level: networks.level },
-    { label: "Last check", value: timeAgo(history.last.at, now), hint: "from GitHub" },
+    { label: "Last check", value: timeAgo(history.last.at, now), hint: "external check" },
   ];
 }
