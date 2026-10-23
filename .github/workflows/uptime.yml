@@ -1,0 +1,70 @@
+name: z5.gg uptime
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  push:
+    branches: [main]
+    paths: ["app/**", "scripts/**", "shared/**", ".github/workflows/uptime.yml"]
+  workflow_dispatch:
+
+concurrency: uptime
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: history.json
+          key: history-${{ github.run_id }}
+          restore-keys: history-
+
+      - id: check
+        run: node scripts/check.mjs
+
+      # the page is built here, only when it's published (about every 15 minutes, or on a change)
+      - if: steps.check.outputs.publish == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - if: steps.check.outputs.publish == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - if: steps.check.outputs.publish == 'true'
+        working-directory: app
+        run: pnpm install --frozen-lockfile && pnpm build && cp ../history.json ../site/history.json
+
+      - if: steps.check.outputs.publish == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploy
+        if: steps.check.outputs.publish == 'true'
+        uses: actions/deploy-pages@v4
+
+      - if: steps.deploy.outcome == 'success'
+        run: node scripts/check.mjs --published
+
+      - uses: actions/cache/save@v4
+        if: always() && hashFiles('history.json') != ''
+        with:
+          path: history.json
+          key: history-${{ github.run_id }}

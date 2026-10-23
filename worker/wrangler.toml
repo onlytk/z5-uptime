@@ -1,0 +1,11 @@
+name = "z5-uptime-alerts"
+main = "alerts.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+[triggers]
+crons = ["* * * * *"]
+
+[[kv_namespaces]]
+binding = "STATE"
+id = "2510a660cf7f478384fdaece6dd42f50"

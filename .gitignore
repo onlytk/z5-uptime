@@ -1,0 +1,6 @@
+app/node_modules/
+app/public/history.json
+history.json
+site/
+worker/.dev.vars
+worker/.wrangler/
