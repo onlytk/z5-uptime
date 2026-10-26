@@ -9,7 +9,7 @@
 import { alert } from "./alerts.js";
 import { check, HISTORY } from "./check.js";
 
-const CHECK_CRON = "*/5 * * * *";
+const CHECK_EVERY_MIN = 5;
 
 export default {
   async fetch(request, env) {
@@ -19,7 +19,9 @@ export default {
     return new Response(history, { headers: { "content-type": "application/json", "cache-control": "no-store" } });
   },
 
+  // one cron, every minute: with a second "*/5" cron, Cloudflare only ran one of them on the minutes both matched
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(event.cron === CHECK_CRON ? check(env) : alert(env));
+    ctx.waitUntil(alert(env));
+    if (new Date(event.scheduledTime).getUTCMinutes() % CHECK_EVERY_MIN === 0) ctx.waitUntil(check(env));
   },
 };

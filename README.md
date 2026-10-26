@@ -52,7 +52,7 @@ Test locally after `pnpm build` in `app/`:
 ```sh
 cd worker
 pnpm dlx wrangler dev --test-scheduled
-curl "localhost:8787/__scheduled?cron=*/5+*+*+*+*"   # a check; "*+*+*+*+*" for alerts
+curl "localhost:8787/__scheduled?time=1767225600000"   # a minute divisible by five: alerts and a check
 curl localhost:8787/history.json
 ```
 
