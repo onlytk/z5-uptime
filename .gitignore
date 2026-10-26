@@ -4,3 +4,4 @@ history.json
 site/
 worker/.dev.vars
 worker/.wrangler/
+.cloudflare/
