@@ -11,9 +11,13 @@ Every five minutes `worker/check.js`:
 
 The history is one JSON value in the KV namespace bound as `STATE`, under `history`, and the Worker
 serves it as `status.z5.gg/history.json`, so the page is current as soon as a check finishes. If the
-value is lost, the page's copy is restored; if that can't be read either, the check fails instead of
-starting over. (`/history.json` answers 503, never 404, when KV is empty, so it can't restore itself
-into an empty history.)
+value is missing or malformed the check fails instead of starting over, and `/history.json` answers
+503. A fresh setup needs it seeded by hand:
+
+```sh
+echo '{"components":{},"incidents":[],"last":null}' > history.json   # or a saved copy
+cf kv keys update history --namespace-id 2510a660cf7f478384fdaece6dd42f50 --file history.json
+```
 
 ## The page
 
@@ -52,4 +56,6 @@ curl "localhost:8787/__scheduled?cron=*/5+*+*+*+*"   # a check; "*+*+*+*+*" for 
 curl localhost:8787/history.json
 ```
 
-A `.dev.vars` can point `SITE`, `PAGE` and `TG_API` at mocks.
+The local KV starts empty; seed it first with
+`pnpm dlx wrangler kv key put history --path ../history.json --binding STATE --local`.
+A `.dev.vars` can point `SITE` and `TG_API` at mocks.

@@ -32,7 +32,10 @@ async function check(env) {
 const clean = (s) => s.replace(/[<>&]/g, "");
 
 async function telegram(env, text) {
-  if (!env.TG_TOKEN || !env.TG_CHAT) return false;
+  if (!env.TG_TOKEN || !env.TG_CHAT) {
+    console.error("TG_TOKEN or TG_CHAT isn't set; no alert sent");
+    return false;
+  }
   const res = await fetch(`${env.TG_API ?? "https://api.telegram.org"}/bot${env.TG_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "content-type": "application/json" },

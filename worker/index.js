@@ -5,7 +5,7 @@
 //   status.z5.gg       the built page from ../site, and /history.json straight from KV
 //
 // Bindings: KV namespace STATE, assets ASSETS, secrets TG_TOKEN and TG_CHAT.
-// SITE, PAGE and TG_API can point elsewhere, for testing.
+// SITE and TG_API can point elsewhere, for testing.
 import { alert } from "./alerts.js";
 import { check, HISTORY } from "./check.js";
 
@@ -15,7 +15,6 @@ export default {
   async fetch(request, env) {
     if (new URL(request.url).pathname !== "/history.json") return env.ASSETS.fetch(request);
     const history = await env.STATE.get(HISTORY);
-    // never a 404: the check reads that as "no history yet" and would start over empty
     if (history === null) return new Response("history unavailable", { status: 503, headers: { "cache-control": "no-store" } });
     return new Response(history, { headers: { "content-type": "application/json", "cache-control": "no-store" } });
   },

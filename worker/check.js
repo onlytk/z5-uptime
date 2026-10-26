@@ -1,12 +1,11 @@
 // Every five minutes: checks z5.gg from outside and records the result in the history the status
 // page reads. Telegram alerts come from alerts.js, every minute.
 //
-// The history lives in KV under "history". If it's gone, the copy on the page is restored; if that
-// can't be read either, the run stops rather than start over empty.
+// The history lives in KV under "history". If it's missing or unreadable the run stops rather than
+// start over empty; seed it by hand (README) on a fresh setup.
 import { isHistory, isPart, isPoint, LEVELS, MAX_SERIES, STATS } from "../shared/history.mjs";
 
 const SITE = "https://z5.gg";
-const PAGE = "https://status.z5.gg";
 export const HISTORY = "history";
 const KEEP_DAYS = 90;
 const KEEP_RESOLVED_INCIDENTS = 200;
@@ -66,27 +65,15 @@ async function readParts(site) {
   }
 }
 
-const emptyHistory = () => ({ components: {}, incidents: [], last: null });
-
-/** The stored history, else the one on the page. A page that says 404 means a first run; anything else is an error. */
+/**
+ * The stored history. There's no fallback to the page: status.z5.gg/history.json is this same KV
+ * value, so a missing one is never a first run to start over from.
+ */
 async function loadHistory(env) {
-  try {
-    const stored = await env.STATE.get(HISTORY, { type: "json" });
-    if (isHistory(stored)) return stored;
-    if (stored !== null) console.log("stored history unreadable, restoring the page's copy");
-  } catch {
-    console.log("stored history unreadable, restoring the page's copy");
-  }
-  for (let i = 0; i < TRIES; i++) {
-    try {
-      const res = await request(`${env.PAGE ?? PAGE}/history.json`);
-      if (res.status === 404) return emptyHistory();
-      const published = await res.json();
-      if (res.ok && isHistory(published)) return published;
-    } catch {}
-    if (i < TRIES - 1) await sleep(RETRY_MS);
-  }
-  throw new Error("history can't be restored from KV or the page; not starting over");
+  const stored = await env.STATE.get(HISTORY, { type: "json" });
+  if (stored === null) throw new Error(`no "${HISTORY}" in KV; seed it (README) before checks can run`);
+  if (!isHistory(stored)) throw new Error(`"${HISTORY}" in KV is malformed; not starting over`);
+  return stored;
 }
 
 /** Degraded still counts as up; unknown isn't counted. Counted on the day the observation was made. */

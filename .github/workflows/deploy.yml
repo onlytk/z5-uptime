@@ -38,3 +38,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
+          # run_worker_first as a list of paths needs Wrangler 4
+          wranglerVersion: "4"
