@@ -39,14 +39,14 @@ export interface Incident {
   end: string | null;
 }
 
-/** history.json, written by scripts/check.mjs. */
+/** history.json, written by worker/check.js. */
 export interface History {
   components: Record<string, { name: string; group: string; note: string; days: Days }>;
   incidents: Incident[];
   last: { at: string; site: "up" | "down"; code: number | null; partsKnown?: boolean; order?: string[]; components: Part[] };
 }
 
-/** Throws unless every record the page reads is present and well-formed (shared with scripts/check.mjs). */
+/** Throws unless every record the page reads is present and well-formed (shared with worker/check.js). */
 export function parseHistory(data: unknown): History {
   if (!isHistory(data) || !(data as History).last) throw new Error("history.json is malformed");
   return data as History;
@@ -58,7 +58,8 @@ export const SITE_ID = "site";
 export const NETWORKS_GROUP = "Payment detection";
 const GROUP_ORDER = ["Reachability", "Platform", NETWORKS_GROUP, "Money movement"];
 const DAY_MS = 86_400_000;
-const STALE_MS = 40 * 60_000;
+// checks run every five minutes; three missed in a row is worth saying
+const STALE_MS = 15 * 60_000;
 
 export const LEVEL_LABEL: Record<Level, string> = { up: "Working", degraded: "Some trouble", down: "Down", unknown: "Unknown" };
 

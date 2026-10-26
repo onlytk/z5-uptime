@@ -1,0 +1,40 @@
+name: deploy
+
+# Builds the page and deploys the Worker that checks z5.gg and serves status.z5.gg. The checks run
+# on the Worker's own cron, so nothing here is scheduled.
+on:
+  push:
+    branches: [main]
+    paths: ["app/**", "shared/**", "worker/**", ".github/workflows/deploy.yml"]
+  workflow_dispatch:
+
+concurrency: deploy
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - working-directory: app
+        run: pnpm install --frozen-lockfile && pnpm build
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker

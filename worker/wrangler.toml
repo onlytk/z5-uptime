@@ -1,11 +1,21 @@
-name = "z5-uptime-alerts"
-main = "alerts.js"
+name = "z5-uptime"
+main = "index.js"
 compatibility_date = "2026-10-01"
 workers_dev = false
+routes = [{ pattern = "status.z5.gg", custom_domain = true }]
+
+[assets]
+directory = "../site"
+binding = "ASSETS"
+run_worker_first = ["/history.json"]
 
 [triggers]
-crons = ["* * * * *"]
+# alerts every minute, the full check every five (index.js tells them apart by the cron string)
+crons = ["* * * * *", "*/5 * * * *"]
 
 [[kv_namespaces]]
 binding = "STATE"
 id = "2510a660cf7f478384fdaece6dd42f50"
+
+[observability]
+enabled = true
